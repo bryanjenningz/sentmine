@@ -1,7 +1,7 @@
 var dictionary = require('./dictionary.js')
 var fs = require('fs')
 var fromFile = 'japanese_sentences_july-7-2016.txt'
-var toFile = 'japanese_sentences_july-7-2016_translations.txt'
+var toFile = 'japanese_sentences_july-7-2016_translations_2.txt'
 
 
 var getTranslations = (text) => {
@@ -12,10 +12,19 @@ var getTranslations = (text) => {
     var foundTranslation = false
     for (var wordLength = Math.min(10, 1 + text.length - start); wordLength >= 1; wordLength--) {
       var word = text.slice(start, start + wordLength)
-      if (!addedWords[word] && dictionary[word]) {
-        translations.push(word + ': ' + dictionary[word].join('; ' + word + ': ').replace(/,/g, ';'))
-        addedWords[word] = true
+      if (dictionary[word]) {
+        // If we find a word in the dictionary that was already looked up, we still want 
+        // to count it as a foundTranslation so that the start variable will skip passed 
+        // the end of the word so that we don't continue trying to look for smaller words,
+        // because finding small words usually results in too many translations with most
+        // of the translations not being very useful.
         foundTranslation = true
+
+        if (!addedWords[word]) {
+          translations.push(word + ': ' + dictionary[word].join('; ' + word + ': ').replace(/,/g, ';'))
+          addedWords[word] = true
+        }
+
         break
       }
     }
